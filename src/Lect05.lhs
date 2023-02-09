@@ -106,7 +106,7 @@ E.g., let's write a specification for `c2k`, `c2f`, `f2c`:
 
 \begin{code}
 c2k :: (Ord a, Floating a) => a -> a
-c2k c | c >= 0 = c + 273.15
+c2k c | c >= -273.15 = c + 273.15
       | otherwise = error "Temperature below absolute zero"
 
 
