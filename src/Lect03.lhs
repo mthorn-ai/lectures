@@ -78,13 +78,13 @@ E.g., define `fst` and `snd` using pattern matching:
 E.g., redefine `distance` using pattern matching:
 
 > distance' :: (Floating a) => (a, a) -> (a, a) -> a
-> distance' = undefined
+> distance' (x1,y1) (x2,y2) = sqrt((x1-x2)^2 + (y1-y2)^2)
 
 
 E.g., define the `mapTup` function using pattern matching:
 
 > mapTup :: (a -> b) -> (a, a) -> (b, b)
-> mapTup = undefined
+> mapTup f t = (f(fst t), f(snd t))
 
 
 As-patterns can be used to bind a variable to a sub-pattern.
@@ -92,7 +92,7 @@ As-patterns can be used to bind a variable to a sub-pattern.
 E.g., implement the (very contrived) function `foo`:
 
 > foo :: (a, (b, c)) -> ((a, (b, c)), (b, c), (a, b, c))
-> foo = undefined
+> foo (x,(y,z)) = ((x,(y,z)),(y,z),(x,y,z))
 
 
 -- Guards
@@ -102,7 +102,10 @@ Boolean "guards" can be used to select between multiple right-hand-sides in a si
 E.g., redefine `fib` using guards. Is it any clearer?
 
 > fib' :: Integer -> Integer
-> fib' = undefined
+> fib' n | n == 0 = 0 
+>        | n == 1 = 1
+>        | otherwise = fib' (n-1) + fib'(n-2)
+
 
 E.g., define `c2h`, which converts Celsius to a "human readable" string:
 
@@ -169,7 +172,11 @@ All result expressions must have the same type!
 E.g., define `quadrantNames` which returns the name of a quadrant (based on the mnemonic "All Science Teachers Crazy"):
 
 > quadrantNames :: (Int, Int) -> String
-> quadrantNames = undefined
+> quadrantNames p = case quadrant p of 1 -> "all"
+>                                      2 -> "science"
+>                                      3 -> "teachers"
+>                                      4 -> "crazy"
+>                                      5 -> "origin"     
 
 
 -- `let-in` expressions
