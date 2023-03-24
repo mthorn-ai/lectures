@@ -2,12 +2,14 @@
 % Lect 09 - Functors, Applicatives, and Monads
 % Michael Lee
 
-> module Lect09 where
-> import Prelude hiding (Functor, fmap, (<$>),
->                        Applicative, pure, (<*>),
->                        Monad, (>>=), (>>), return)
+\begin{code}
+module Lect09 where
+import Prelude hiding (Functor, fmap, (<$>),
+                       Applicative, pure, (<*>),
+                       Monad, (>>=), (>>), return)
+import Data.List hiding (find)
+\end{code}
 
-> import Data.List hiding (find)
 
 Functors, Applicatives, and Monads
 ==================================
@@ -25,8 +27,10 @@ Functors are a class of types that support a "mapping" operation. An instance of
 functor must be a polymorphic type, as a type variable will be used to repesent
 the target of the mapped function. Here's the `Functor` class:
 
-> class Functor f where
->   fmap :: (a -> b) -> f a -> f b
+\begin{code}
+class Functor f where
+  fmap :: (a -> b) -> f a -> f b
+\end{code}
 
 Note that the kind of type `f` implied by the class definition above is 
 `* -> *`, as `f a` and `f b` in the type definition of `fmap` use `f` as a type
@@ -36,8 +40,16 @@ constructor.
 
 We can make a list a Functor, where `fmap` is identical to `map`
 
+<<<<<<< HEAD
 > instance Functor [] where
 >   fmap = map
+=======
+\begin{code}
+instance Functor [] where
+  fmap :: (a -> b) -> [a] -> [b]
+  fmap = undefined
+\end{code}
+>>>>>>> 47e06c2bd6abaad4c5446e15d12485e64899436d
 
 Note that the implied type of `fmap` in the instance (replacing `f` from the
 class definition with the instance `[]`) is:
@@ -56,74 +68,105 @@ to map the function (2*) over the values in the list.
 
 Let's define `fmap` for the Maybe type:
 
+<<<<<<< HEAD
 > instance Functor Maybe where
 >   fmap f Nothing = Nothing
 >   fmap f (Just x) = Just (f x)
+=======
+\begin{code}
+instance Functor Maybe where
+  fmap :: (a -> b) -> Maybe a -> Maybe b
+  fmap = undefined
+\end{code}
+>>>>>>> 47e06c2bd6abaad4c5446e15d12485e64899436d
 
 we can now do:
 
-    fmap (2*) Just 10
+\begin{verbatim}
+  fmap (2*) Just 10
+  
+  fmap (100^) Nothing
+\end{verbatim}
 
-    fmap (100^) Nothing
 
 If we consider `Nothing` to be the result of a failed computation, it makes
 sense that `fmap`-ing over it also results in `Nothing`.     
 
 ---
 
-The `<$>` operator is defined as the infix form of `fmap`:
+We can define an infix form of `fmap`:
 
-> infixl 4 <$>
-> (<$>) :: Functor f => (a -> b) -> f a -> f b
-> (<$>) = fmap
+\begin{code}
+infixl 4 <$>
+(<$>) :: Functor f => (a -> b) -> f a -> f b
+(<$>) = fmap
+\end{code}
 
-Think of `<$>` as representing function application to values in an arbitrary
-context, where the context is represented by a functor instance. E.g.,
+Think of this operator as representing function application to values in an 
+arbitrary context, where the context is represented by a functor instance. 
 
-    reverse <$> ["Hello", "how", "are", "you"]
+E.g.,
 
-    reverse <$> Just "Aloha"
-
-    reverse <$> Nothing
+\begin{verbatim}
+  reverse <$> ["Hello", "how", "are", "you"]
+  
+  reverse <$> Just "Aloha"
+  
+  reverse <$> Nothing
+\end{verbatim}
 
 ---
 
 Let's define `fmap` for a tree:
 
+<<<<<<< HEAD
 > data Tree a = Node a [Tree a] | Leaf a
 >
 > instance Functor Tree where
 >   fmap f (Leaf x) = Leaf $ f x
 >   fmap f (Node x ts) = Node (f x) $ fmap (fmap f) ts
+=======
+\begin{code}
+data Tree a = Node a [Tree a] | Leaf a
+
+instance Functor Tree where
+  fmap :: (a -> b) -> Tree a -> Tree b
+  fmap = undefined
+\end{code}
+
+>>>>>>> 47e06c2bd6abaad4c5446e15d12485e64899436d
 
 Here's a `Show` instance that makes it easier to visualize trees and a few trees
 to play with:
 
-> -- Show instance below is to make visualizing tree changes easier!
-> instance (Show a) => Show (Tree a) where
->   show t = s 0 t
->     where s n (Leaf x) = replicate n '.' ++ show x ++ "\n"
->           s n (Node x t) = replicate n '.'
->                                ++ show x ++ "\n"
->                                ++ concat (map (s (n+2)) t)
->
-> t1 :: Tree String
-> t1 = Node "Animals" [
->        Leaf "Arthropods", 
->        Node "Chordates" [ Leaf "Birds", Leaf "Mammals", Leaf "Reptiles" ],
->        Leaf "Nematodes"
->      ]
->
-> t2 :: Tree Integer
-> t2 = Node 8 [
->        Node 5 [ 
->            Node 2 [Leaf 1, Leaf 1], 
->            Node 3 [Leaf 1, 
->                    Node 2 [Leaf 1, Leaf 1] ]
->        ],
->        Node 3 [Leaf 1, 
->                 Node 2 [Leaf 1, Leaf 1] ]
->      ]
+\begin{code}
+-- Show instance below is to make visualizing tree changes easier!
+instance (Show a) => Show (Tree a) where
+  show :: Show a => Tree a -> String
+  show t = s 0 t
+    where s n (Leaf x) = replicate n '.' ++ show x ++ "\n"
+          s n (Node x t) = replicate n '.'
+                               ++ show x ++ "\n"
+                               ++ concat (map (s (n+2)) t)
+
+t1 :: Tree String
+t1 = Node "Animals" [
+       Leaf "Arthropods", 
+       Node "Chordates" [ Leaf "Birds", Leaf "Mammals", Leaf "Reptiles" ],
+       Leaf "Nematodes"
+     ]
+
+t2 :: Tree Integer
+t2 = Node 8 [
+       Node 5 [ 
+           Node 2 [Leaf 1, Leaf 1], 
+           Node 3 [Leaf 1, 
+                   Node 2 [Leaf 1, Leaf 1] ]
+       ],
+       Node 3 [Leaf 1, 
+                Node 2 [Leaf 1, Leaf 1] ]
+     ]
+\end{code}
 
 ---
 
@@ -135,12 +178,22 @@ The `->` operator itself is a type constructor with kind `* -> * -> *`, so we
 can write a Functor instance for the type `((->) a)` (note that `a` is the first
 / left-hand argument to the type constructor `->`):
 
+<<<<<<< HEAD
 > instance Functor ((->) a) where
 >   fmap = (.)
+=======
+\begin{code}
+instance Functor ((->) a) where
+  fmap :: (b -> c) -> (a -> b) -> (a -> c)
+  fmap = undefined
+\end{code}
+>>>>>>> 47e06c2bd6abaad4c5446e15d12485e64899436d
 
 How should we interpret the following?
 
-    ((2*) <$> (5+) <$> (100-)) 90    
+\begin{verbatim}
+  ((2*) <$> (5+) <$> (100-)) 90    
+\end{verbatim}
 
 ---
 
@@ -157,37 +210,57 @@ The Applicative class extends Functors with additional methods. "pure" takes a
 value and wraps it in a Functor instance, while "<*>" applies a function found
 in one Functor to a value in another Functor.
 
-> class (Functor f) => Applicative f where
->   pure :: a -> f a
->   infixl 4 <*>
->   (<*>) :: f (a -> b) -> f a -> f b
+\begin{code}
+class (Functor f) => Applicative f where
+  pure :: a -> f a
+  
+  infixl 4 <*>
+  (<*>) :: f (a -> b) -> f a -> f b
+\end{code}
 
 ---
 
 Let's make `Maybe` an Applicative instance:
 
+<<<<<<< HEAD
 > instance Applicative Maybe where
 >   pure = Just
 >
 >   Just f <*> Just x = Just $ f x
 >   _ <*> _ = Nothing
+=======
+\begin{code}
+instance Applicative Maybe where
+  pure :: a -> Maybe a
+  pure = undefined
+  
+  (<*>) :: Maybe (a -> b) -> Maybe a -> Maybe b
+  (<*>) = undefined
+\end{code}
+
+>>>>>>> 47e06c2bd6abaad4c5446e15d12485e64899436d
 
 Now we can do:
 
-    pure (2*) <*> pure 5
+\begin{verbatim}
+  pure (2*) <*> pure 5
 
-    pure ("hello" ++ ) <*> Just "world"
+  pure ("hello" ++ ) <*> Just "world"
 
-    (*) <$> Just 2 <*> Just 5
+  (*) <$> Just 2 <*> Just 5
 
-    (\x y z -> x++y++z)  <$> Just "hello" <*> Just "hola" <*> Just "hi"
+  (\x y z -> x++y++z)  <$> Just "hello" <*> Just "hola" <*> Just "hi"
+\end{verbatim}
+
 
 More interestingly, if any of the arguments are `None`, the Applicative instance
 handles it correctly:
 
-    (*) <$> Nothing <*> Just 5
+\begin{verbatim}
+  (*) <$> Nothing <*> Just 5
 
-    (\x y z -> x++y++z)  <$> Just "hello" <*> Nothing <*> Just "hi"
+  (\x y z -> x++y++z)  <$> Just "hello" <*> Nothing <*> Just "hi"
+\end{verbatim}
 
 ---
 
@@ -196,16 +269,29 @@ list represents for its values, and how to combine them (via `<*>`). One way is
 just to think of them as ordered sequences of values, and for `<*>` to apply a
 function in the first list to the corresponding element in the second:
 
+<<<<<<< HEAD
 > instance Applicative [] where
 >   pure x = repeat x
 >
 >   [] <*> _ = []
 >   _ <*> [] = []
 >   (f:fs) <*> (x:xs) = f x : (fs <*> xs)
+=======
+\begin{code}
+instance Applicative [] where
+  pure :: a -> [a]
+  pure = undefined
+  
+  (<*>) :: [a -> b] -> [a] -> [b]
+  (<*>) = undefined
+\end{code}
+>>>>>>> 47e06c2bd6abaad4c5446e15d12485e64899436d
 
 Try:
 
-    [(2^), (5+), (3*)] <*> [5..7]
+\begin{verbatim}
+  [(2^), (5+), (3*)] <*> [5..7]
+\end{verbatim}
 
 A more interesting approach would be to think of a list as representing a
 non-deterministic context --- i.e., one in which all choices are equally likely.
@@ -217,10 +303,13 @@ define a separate Applicative instance for the list type, we have to create a
 new type based on the list. We can do this with the `newtype` keyword, which
 lets us create a type based on another with a single value constructor:
 
-> newtype NDList a = NDList [a] deriving Show
+\begin{code}
+newtype NDList a = NDList [a] deriving Show
+\end{code}
 
 Now we can make `NDList` an instance of Functor and Applicative:
 
+<<<<<<< HEAD
 > instance Functor NDList where
 >   fmap f (NDList l) = NDList $ map f l
 >
@@ -228,14 +317,31 @@ Now we can make `NDList` an instance of Functor and Applicative:
 >   pure x = NDList [x]
 >
 >   NDList fs <*> NDList xs = NDList [f x | f <- fs, x <- xs]
+=======
+\begin{code}
+instance Functor NDList where
+  fmap :: (a -> b) -> NDList a -> NDList b
+  fmap = undefined
+
+instance Applicative NDList where
+  pure :: a -> NDList a
+  pure = undefined
+  
+  (<*>) :: NDList (a -> b) -> NDList a -> NDList b
+  (<*>) = undefined
+\end{code}
+
+>>>>>>> 47e06c2bd6abaad4c5446e15d12485e64899436d
 
 Try:
 
-    NDList [("Hello "++)] <*> NDList ["Michael", "Mary", "Beth"]
+\begin{verbatim}
+  NDList [("Hello "++)] <*> NDList ["Michael", "Mary", "Beth"]
 
-    NDList [(2^), (5+), (3*)] <*> NDList [5..7]
+  NDList [(2^), (5+), (3*)] <*> NDList [5..7]
 
-    NDList [(,)] <*> NDList [1..10] <*> NDList "hello"
+  NDList [(,)] <*> NDList [1..10] <*> NDList "hello"
+\end{verbatim}
 
 The built-in Applicative list instance is based on this non-deterministic
 interpretation.
@@ -244,14 +350,27 @@ interpretation.
 
 We can also make a function an Applicative:
 
+<<<<<<< HEAD
 > instance Applicative ((->) a) where
 >   pure x = \_ -> x
 >
 >   f <*> g = \x -> (f x) (g x)
+=======
+\begin{code}
+instance Applicative ((->) a) where
+  pure :: b -> (a -> b)
+  pure = undefined
+
+  (<*>) :: (a -> (b -> c)) -> (a -> b) -> (a -> c)
+  (<*>) = undefined
+\end{code}
+>>>>>>> 47e06c2bd6abaad4c5446e15d12485e64899436d
 
 What does this do?
 
+\begin{verbatim}
   (zip <*> drop 5) [1..10]
+\end{verbatim}
 
 ---
 
@@ -259,33 +378,37 @@ Applicatives are handy for when we need to apply "pure" functions to values in
 contexts represented by Functors. A pure function is one that does not wrap its
 return value in a context. 
 
-E.g., `even`, `+`, and `+++` are all pure functions that operate directly on
-numbers and lists; `<$>` and `<*>` allow us to apply those functions to values
-in various Functor instances:
+E.g., 
 
-    even <$> [1..10]
+\begin{verbatim}
+  even <$> [1..10]
 
-    (+) <$> Just 5 <*> Just 10
+  (+) <$> Just 5 <*> Just 10
 
-    (++) <$> ["hello, ", "hola, "] <*> ["mister", "senor"]
+  (++) <$> ["hello, ", "hola, "] <*> ["mister", "senor"]
 
-    (++) <$> NDList ["hello, ", "hola, "] <*> NDList ["mister", "senor"]
+  (++) <$> NDList ["hello, ", "hola, "] <*> NDList ["mister", "senor"]
+\end{verbatim}
 
 But what happens when we want to apply an "impure" function --- i.e., one that
 returns its own context --- to a value in a Functor? 
 
 E.g., recall the `find` function:
 
-> find :: (a -> Bool) -> [a] -> Maybe a
-> find _ [] = Nothing
-> find p (x:xs) | p x = Just x
->               | otherwise = find p xs
+\begin{code}
+find :: (a -> Bool) -> [a] -> Maybe a
+find _ [] = Nothing
+find p (x:xs) | p x = Just x
+              | otherwise = find p xs
+\end{code}
 
 What happens when we do the following?
 
-    find even <$> Just [1..10]
+\begin{verbatim}
+  find even <$> Just [1..10]
 
-    find (>100) <$> Just [1..100]
+  find (>100) <$> Just [1..100]
+\end{verbatim}
 
 We end up with contexts within contexts ... where what we likely want is to
 somehow merge the contexts together in a meaningful way (e.g., in a `Maybe`
@@ -294,22 +417,25 @@ probably just be interpreted as `Just x`, and `Just Nothing` should probably
 just be `Nothing`).
 
 
+
 Monads
 ------
 
 The Monad class further extends Applicatives so that they support the additional
 methods `>>=` ("bind"), `>>` ("sequence"), and `return`:
 
-> class (Applicative m) => Monad m where
->   infixl 1 >>=
->   (>>=) :: m a -> (a -> m b) -> m b -- called "bind"
-> 
->   infixl 1 >>
->   (>>) :: m a -> m b -> m b -- called "sequence"
->   x >> y = x >>= \_ -> y
-> 
->   return :: a -> m a
->   return = pure
+\begin{code}
+class (Applicative m) => Monad m where
+  infixl 1 >>=
+  (>>=) :: m a -> (a -> m b) -> m b -- called "bind"
+
+  infixl 1 >>
+  (>>) :: m a -> m b -> m b -- called "sequence"
+  x >> y = x >>= \_ -> y
+
+  return :: a -> m a
+  return = pure
+\end{code}
 
 As with the preceding classes, a Monad represents a context for computations or
 values. The `>>=` (bind) operator takes a monad and a function, applies the
@@ -323,15 +449,25 @@ synonym for `pure`.
 
 Let's make `Maybe` a Monad instance:
 
+<<<<<<< HEAD
 > instance Monad Maybe where
 >   Nothing >>= _ = Nothing
 >   Just x >>= f = f x
+=======
+\begin{code}
+instance Monad Maybe where
+  (>>=) :: Maybe a -> (a -> Maybe b) -> Maybe b
+  (>>=) = undefined
+\end{code}
+>>>>>>> 47e06c2bd6abaad4c5446e15d12485e64899436d
 
 Now we get sensible results by doing:
 
-    Just [1..10] >>= find even
+\begin{verbatim}
+  Just [1..10] >>= find even
 
-    Just [1..10] >>= find (>100)
+  Just [1..10] >>= find (>100)
+\end{verbatim}
 
 ---
 
@@ -342,9 +478,11 @@ For a better example of how this is useful, consider `div`, defined in Prelude:
 `div` throws an exception if the denominator is 0. We can improve on this by
 writing `safeDiv` as follows:
 
-> safeDiv :: Integral a => a -> a -> Maybe a
-> safeDiv _ 0 = Nothing
-> safeDiv x y = Just $ x `div` y
+\begin{code}
+safeDiv :: Integral a => a -> a -> Maybe a
+safeDiv _ 0 = Nothing
+safeDiv x y = Just $ x `div` y
+\end{code}
 
 Imagine that we need to implement a function that computes the following with
 integral operands:
@@ -355,6 +493,7 @@ integral operands:
 
 Without bind, we might write:
 
+<<<<<<< HEAD
 > fDivs :: Integral a => a -> a -> a -> a -> a -> a -> Maybe a
 > fDivs a b c d e f = case a `safeDiv` b 
 >                     of Nothing -> Nothing
@@ -373,6 +512,19 @@ Or we can use our bind operator:
 >                      c `safeDiv` d >>= \r' ->
 >                      (r + r') `safeDiv` e >>= \r'' ->
 >                      Just $ r'' * f
+=======
+\begin{code}
+fDivs :: Integral a => a -> a -> a -> a -> a -> a -> Maybe a
+fDivs a b c d e f = undefined
+\end{code}
+
+Or we can use our bind operator:
+
+\begin{code}
+fDivs' :: Integral a => a -> a -> a -> a -> a -> a -> Maybe a
+fDivs' a b c d e f = undefined
+\end{code}
+>>>>>>> 47e06c2bd6abaad4c5446e15d12485e64899436d
 
 Notice how each bind operation is followed by a lambda that is passed the value
 "inside" the preceding monad, and how each lambda itself evaluates to a monad.
@@ -396,11 +548,13 @@ don't need to keep checking to see if any of the `saveDiv` calls failed!
 The lambda chaining is such a common pattern that Haskell provides special
 syntax for doing this -- "do notation":
 
-> fDivs'' :: Integral a => a -> a -> a -> a -> a -> a -> Maybe a
-> fDivs'' a b c d e f = do r   <- a `safeDiv` b
->                          r'  <- c `safeDiv` d
->                          r'' <- (r + r') `safeDiv` e
->                          return $ r'' * f
+\begin{code}
+fDivs'' :: Integral a => a -> a -> a -> a -> a -> a -> Maybe a
+fDivs'' a b c d e f = do r   <- a `safeDiv` b
+                         r'  <- c `safeDiv` d
+                         r'' <- (r + r') `safeDiv` e
+                         return $ r'' * f
+\end{code}
 
 Each line in a do block represents a monadic value, and "<-" appears to allow us
 to "extract" the contents of a monad. Behind the scenes, what's really going on
