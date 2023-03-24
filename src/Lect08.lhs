@@ -70,9 +70,21 @@ not' = undefined
 (|||) = undefined
 
 
-or' :: [YesOrNo] -> YesOrNo
-or' = undefined
-\end{code}
+> yn1 :: YesOrNo
+> yn1 = Yes
+>
+> yn2 :: YesOrNo
+> yn2 = No
+>
+> not' :: YesOrNo -> YesOrNo
+> not' Yes = No
+> not' No  = Yes
+>
+> (|||) :: YesOrNo -> YesOrNo -> YesOrNo
+> (|||) = undefined
+>
+> or' :: [YesOrNo] -> YesOrNo
+> or' = undefined
 
 ---
 
@@ -98,9 +110,11 @@ Use pattern matching to write some Box functions:
 boxStr :: Box -> String
 boxStr = undefined
 
-boxCombine :: Box -> Box -> Box
-boxCombine = undefined
-\end{code}
+> boxStr :: Box -> String
+> boxStr = undefined
+>
+> boxCombine :: Box -> Box -> Box
+> boxCombine = undefined
 
 ---
 
@@ -108,11 +122,9 @@ We can have multiple value constructors with varying numbers of fields.
 
 E.g., `Shape` has three value constructors, each with one or more fields:
 
-\begin{code}
-data Shape = Circle Double 
-             | Triangle Double Double 
-             | Rectangle Double Double deriving Show
-\end{code}
+> data Shape = Circle Double 
+>              | Triangle Double Double 
+>              | Rectangle Double Double
 
 Pattern matching lets us differentiate between different values of a given type,
 and extract their fields. Try implementing:
@@ -216,18 +228,13 @@ d4 = RussianDoll "and on and on" d4
 
 Write a function to return the message in the innermost non-empty doll:
 
-\begin{code}
-innerMostMessage :: RussianDoll -> String
-innerMostMessage = undefined
-\end{code}
-
+> innerMostMessage :: RussianDoll -> String
+> innerMostMessage = undefined
 
 Write a function to reverse the order of messages in a doll:
 
-\begin{code}
-reverseMessages :: RussianDoll -> RussianDoll
-reverseMessages = undefined
-\end{code}
+> reverseMessages :: RussianDoll -> RussianDoll
+> reverseMessages = undefined
 
 
 Polymorphic Types
@@ -265,10 +272,11 @@ E.g., define some some functions on `UniversalBox` values:
 catBoxes :: UniversalBox [a] -> UniversalBox [a] -> UniversalBox [a]
 catBoxes = undefined
 
+> boxStrCat :: UniversalBox String -> UniversalBox String -> UniversalBox String
+> boxStrCat = undefined
 
-sumBoxes :: Num a => [UniversalBox a] -> UniversalBox a
-sumBoxes = undefined
-\end{code}
+> boxComp :: Ord a => UniversalBox a -> UniversalBox a -> Ordering
+> boxComp = undefined
 
 
 We say the `UniversalBox` type constructor has "kind" (* -> *), where * denotes
@@ -363,9 +371,14 @@ l3 = (1 :- 2 :- Null) :- (3 :- 4 :- Null) :- Null
 
 Let's define some list functions!
 
-\begin{code}
-enumFromToL :: (Eq a, Enum a) => a -> a -> List a
-enumFromToL = undefined
+> takeL :: Int -> List a -> List a
+> takeL = undefined
+>
+> mapL :: (a -> b) -> List a -> List b
+> mapL = undefined
+>
+> foldrL :: (a -> b -> b) -> b -> List a -> b
+> foldrL = undefined
 
 
 enumFromL :: (Eq a, Enum a) => a -> List a
@@ -396,16 +409,22 @@ class Explosive a where
 To make a type an instance of a class, we need implement the needed method(s).
 Define the following instances of `Explosive`.
 
-\begin{code}
-instance Explosive Integer where
-  explode :: Integer -> [Integer]
-  explode = undefined
+> instance Explosive Integer where
+>   explode = undefined
+>
+> instance Explosive Char where
+>   explode = undefined
+>
+> instance Explosive [a] where
+>   explode = undefined
 
 instance Explosive [a] where
   explode :: [a] -> [[a]]
   explode = undefined
 \end{code}
 
+> blowItAllUp :: Explosive a => [a] -> [[a]]
+> blowItAllUp = undefined
 
 ---
 
@@ -433,11 +452,8 @@ E.g., make the `Student` type defined earlier (show below) an instance of `Eq`:
       grades    :: [Char]
     } 
 
-\begin{code}
-instance Eq Student where
-  (==) :: Student -> Student -> Bool
-  (Student _ _ id1 _) == (Student _ _ id2 _) = id1 == id2
-\end{code}
+> instance Eq Student where
+>   (==) = undefined
 
 ---
 
@@ -467,50 +483,14 @@ An instance only needs to define either the `compare` or `<=` methods.
 
 E.g., make `Student` an instance of `Ord`:
 
-\begin{code}
-instance Ord Student where
-  compare :: Student -> Student -> Ordering
-  compare (Student _ _ id1 _) (Student _ _ id2 _) = compare id1 id2
-\end{code}
-
+> instance Ord Student where
+>   compare = undefined
 
 Making a polymorphic type an instance of a class may require adding constraints
 to the instance declaration. E.g., complete our `List` instance of `Eq`:
 
-\begin{code}
-instance (Eq a) => Eq (List a) where
-  (==) :: Eq a => List a -> List a -> Bool
-  (==) = undefined
-\end{code}
-
----
-
-Another useful class is `Foldable`, which only require `foldr` to be defined:
-
-\begin{verbatim}
-class Foldable t where
-  foldr   :: (a -> b -> b) -> b -> t a -> b
-  foldr   :: (a -> b -> b) -> b -> t a -> b
-  foldl   :: (b -> a -> b) -> b -> t a -> b
-  foldr1  :: (a -> a -> a) -> t a -> a
-  foldl1  :: (a -> a -> a) -> t a -> a
-  null    :: t a -> Bool
-  length  :: t a -> Int
-  elem    :: Eq a => a -> t a -> Bool
-  maximum :: Ord a => t a -> a
-  minimum :: Ord a => t a -> a
-  sum     :: Num a => t a -> a
-  product :: Num a => t a -> a
-\end{verbatim}
-
-
-Make `List` an instance of `Foldable`:
-
-\begin{code}
-instance Foldable List where
-  foldr :: (a -> b -> b) -> b -> List a -> b
-  foldr = undefined
-\end{code}
+> instance (Eq a) => Eq (List a) where
+>   (==) = undefined
 
 
 -- Automatic derivation
