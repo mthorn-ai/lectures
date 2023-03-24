@@ -7,6 +7,7 @@
 module Lect08 where
 import Prelude hiding (Word, Maybe, Just, Nothing, Either, Left, Right)
 import Data.Char
+import Data.Type.Equality (inner)
 \end{code}
 
 Defining Types and Type Classes
@@ -63,28 +64,18 @@ We can pattern match on value constructors. Implement:
 
 \begin{code}
 not' :: YesOrNo -> YesOrNo
-not' = undefined
+not' Yes = No
+not' No = Yes
 
 
 (|||) :: YesOrNo -> YesOrNo -> YesOrNo
-(|||) = undefined
+No ||| No = No
+_  ||| _  = Yes
 
 
-> yn1 :: YesOrNo
-> yn1 = Yes
->
-> yn2 :: YesOrNo
-> yn2 = No
->
-> not' :: YesOrNo -> YesOrNo
-> not' Yes = No
-> not' No  = Yes
->
-> (|||) :: YesOrNo -> YesOrNo -> YesOrNo
-> (|||) = undefined
->
-> or' :: [YesOrNo] -> YesOrNo
-> or' = undefined
+or' :: [YesOrNo] -> YesOrNo
+or' = foldr (|||) No 
+\end{code}
 
 ---
 
@@ -93,7 +84,8 @@ In a type definition, value constructors may be followed by field types.
 E.g., consider the following type (note that type names and value constructor names can be the same):
 
 \begin{code}
-data Box = Box Int Bool String deriving Show
+data Box = Box Int Bool String 
+           deriving Show
 \end{code}
 
 Let's construct some Boxes:
@@ -108,13 +100,11 @@ Use pattern matching to write some Box functions:
 
 \begin{code}
 boxStr :: Box -> String
-boxStr = undefined
+boxStr (Box _ _ s) = "the box's string is = " ++ s
 
-> boxStr :: Box -> String
-> boxStr = undefined
->
-> boxCombine :: Box -> Box -> Box
-> boxCombine = undefined
+boxCombine :: Box -> Box -> Box
+boxCombine (Box n1 b1 s1) (Box n2 b2 s2) = Box (n1+n2) (b1 && b2) (s1 ++ s2)
+\end{code}
 
 ---
 
@@ -122,16 +112,20 @@ We can have multiple value constructors with varying numbers of fields.
 
 E.g., `Shape` has three value constructors, each with one or more fields:
 
-> data Shape = Circle Double 
->              | Triangle Double Double 
->              | Rectangle Double Double
+\begin{code}
+data Shape = Circle Double 
+             | Triangle Double Double 
+             | Rectangle Double Double deriving Show
+\end{code}
 
 Pattern matching lets us differentiate between different values of a given type,
 and extract their fields. Try implementing:
 
 \begin{code}
 area :: Shape -> Double
-area = undefined
+area (Circle r) = pi * r * r
+area (Triangle h b) = h * b / 2
+area (Rectangle l w) = l * w
 \end{code}
 
 ---
@@ -143,8 +137,8 @@ be formed from the "sum" and "product" of other types.
 Here are two sum types:
 
 \begin{code}
-data T1 = T1V1 | T1V2 | T1V3
-data T2 = T2V1 Bool | T2V2 T1
+data T1 = T1V1 | T1V2 | T1V3 -- 3 possible values
+data T2 = T2V1 Bool | T2V2 T1 -- 2+3 = 5 possible values
 \end{code}
 
 How many values belong to type `T2`?
@@ -153,7 +147,7 @@ How many values belong to type `T2`?
 Here's a product type:
 
 \begin{code}
-data T3 = T3V Bool T1
+data T3 = T3V Bool T1 -- 6 possible values
 \end{code}
 
 
@@ -163,7 +157,7 @@ How many values belong to type `T3`?
 Here's a type that is both a sum and product type:
 
 \begin{code}
-data T4 = T4V1 T1 T2 | T4V2 T2 T3
+data T4 = T4V1 T1 T2 | T4V2 T2 T3 -- 3*5 + 5*6 = 45 possible values
 \end{code}
 
 How many values belong to type `T4`?
@@ -174,6 +168,7 @@ We may use "record" syntax to define attribute names and automatically
 generate "getter" functions:
 
 \begin{code}
+
 data Student = Student { firstName :: String
                        , lastName  :: String
                        , studentId :: Integer
@@ -228,13 +223,22 @@ d4 = RussianDoll "and on and on" d4
 
 Write a function to return the message in the innermost non-empty doll:
 
-> innerMostMessage :: RussianDoll -> String
-> innerMostMessage = undefined
+\begin{code}
+innerMostMessage :: RussianDoll -> String
+innerMostMessage EmptyDoll = error "no empty dolls!"
+innerMostMessage (RussianDoll m EmptyDoll) = m
+innerMostMessage (RussianDoll m d) = innerMostMessage d
+\end{code}
+
 
 Write a function to reverse the order of messages in a doll:
 
-> reverseMessages :: RussianDoll -> RussianDoll
-> reverseMessages = undefined
+\begin{code}
+reverseMessages :: RussianDoll -> RussianDoll
+reverseMessages d = rev d EmptyDoll
+  where rev EmptyDoll acc = acc
+        rev (RussianDoll m d) acc = rev d (RussianDoll m acc)
+\end{code}
 
 
 Polymorphic Types
@@ -270,13 +274,14 @@ E.g., define some some functions on `UniversalBox` values:
 
 \begin{code}
 catBoxes :: UniversalBox [a] -> UniversalBox [a] -> UniversalBox [a]
-catBoxes = undefined
+catBoxes (UBox l1) (UBox l2) = UBox $ l1++l2
 
-> boxStrCat :: UniversalBox String -> UniversalBox String -> UniversalBox String
-> boxStrCat = undefined
 
-> boxComp :: Ord a => UniversalBox a -> UniversalBox a -> Ordering
-> boxComp = undefined
+sumBoxes :: Num a => [UniversalBox a] -> UniversalBox a
+sumBoxes [] = UBox 0
+sumBoxes ((UBox n):bs) = let UBox r = sumBoxes bs
+                         in UBox $ n + r
+\end{code}
 
 
 We say the `UniversalBox` type constructor has "kind" (* -> *), where * denotes
@@ -296,17 +301,17 @@ a value (or error).
 E.g., rewrite the following functions using `Maybe`:
 
 \begin{code}
-quadRoots :: Double -> Double -> Double -> (Double,Double)
+quadRoots :: Double -> Double -> Double -> Maybe (Double,Double)
 quadRoots a b c = let d = b^2-4*a*c
                       sd = sqrt d
                   in if d < 0
-                     then error "No real roots"
-                     else ((-b+sd)/(2*a), (-b-sd)/(2*a))
+                     then Nothing
+                     else Just ((-b+sd)/(2*a), (-b-sd)/(2*a))
 
 
-find :: (a -> Bool) -> [a] -> a
-find _ [] = error "Value not found"
-find p (x:xs) | p x = x
+find :: (a -> Bool) -> [a] -> Maybe a
+find _ [] = Nothing
+find p (x:xs) | p x = Just x
               | otherwise = find p xs
 \end{code}
 
@@ -325,10 +330,10 @@ contains error values, and the `Right` constructor contains correct values.
 E.g., rewrite the following using `Either`:
 
 \begin{code}
-find' :: (a -> Bool) -> [a] -> a
-find' _ [] = error "List was empty"
-find' p (x:xs) | p x = x
-               | null xs = error "No element satisifying predicate"
+find' :: (a -> Bool) -> [a] -> Either String a
+find' _ [] = Left "List was empty"
+find' p (x:xs) | p x = Right x
+               | null xs = Left "No element satisifying predicate"
                | otherwise = find' p xs
 \end{code}
 
@@ -371,22 +376,20 @@ l3 = (1 :- 2 :- Null) :- (3 :- 4 :- Null) :- Null
 
 Let's define some list functions!
 
-> takeL :: Int -> List a -> List a
-> takeL = undefined
->
-> mapL :: (a -> b) -> List a -> List b
-> mapL = undefined
->
-> foldrL :: (a -> b -> b) -> b -> List a -> b
-> foldrL = undefined
+\begin{code}
+enumFromToL :: (Eq a, Enum a) => a -> a -> List a
+enumFromToL x y | x == y = x :- Null
+                | otherwise = x :- enumFromToL (succ x) y
 
 
 enumFromL :: (Eq a, Enum a) => a -> List a
-enumFromL = undefined
+enumFromL x = x :- enumFromL (succ x)
 
 
 takeL :: Int -> List a -> List a
-takeL = undefined
+takeL 0 _ = Null
+takeL _ Null = Null
+takeL n (x :- xs) = x :- takeL (n-1) xs
 \end{code}
 
 
@@ -409,22 +412,16 @@ class Explosive a where
 To make a type an instance of a class, we need implement the needed method(s).
 Define the following instances of `Explosive`.
 
-> instance Explosive Integer where
->   explode = undefined
->
-> instance Explosive Char where
->   explode = undefined
->
-> instance Explosive [a] where
->   explode = undefined
+\begin{code}
+instance Explosive Integer where
+  explode :: Integer -> [Integer]
+  explode n = replicate 5 n
 
 instance Explosive [a] where
   explode :: [a] -> [[a]]
-  explode = undefined
+  explode l = [[x] | x <- l]
 \end{code}
 
-> blowItAllUp :: Explosive a => [a] -> [[a]]
-> blowItAllUp = undefined
 
 ---
 
@@ -452,8 +449,11 @@ E.g., make the `Student` type defined earlier (show below) an instance of `Eq`:
       grades    :: [Char]
     } 
 
-> instance Eq Student where
->   (==) = undefined
+\begin{code}
+instance Eq Student where
+  (==) :: Student -> Student -> Bool
+  (Student _ _ id1 _) == (Student _ _ id2 _) = id1 == id2
+\end{code}
 
 ---
 
@@ -483,14 +483,53 @@ An instance only needs to define either the `compare` or `<=` methods.
 
 E.g., make `Student` an instance of `Ord`:
 
-> instance Ord Student where
->   compare = undefined
+\begin{code}
+instance Ord Student where
+  compare :: Student -> Student -> Ordering
+  compare (Student _ _ id1 _) (Student _ _ id2 _) = compare id1 id2
+\end{code}
+
 
 Making a polymorphic type an instance of a class may require adding constraints
 to the instance declaration. E.g., complete our `List` instance of `Eq`:
 
-> instance (Eq a) => Eq (List a) where
->   (==) = undefined
+\begin{code}
+instance (Eq a) => Eq (List a) where
+  (==) :: Eq a => List a -> List a -> Bool
+  Null == Null = True
+  Null == _ = False
+  _ == Null = False
+  (x :- xs) == (y :- ys) = x == y && xs == ys
+\end{code}
+
+---
+
+Another useful class is `Foldable`, which only require `foldr` to be defined:
+
+\begin{verbatim}
+class Foldable t where
+  foldr   :: (a -> b -> b) -> b -> t a -> b
+  foldl   :: (b -> a -> b) -> b -> t a -> b
+  foldr1  :: (a -> a -> a) -> t a -> a
+  foldl1  :: (a -> a -> a) -> t a -> a
+  null    :: t a -> Bool
+  length  :: t a -> Int
+  elem    :: Eq a => a -> t a -> Bool
+  maximum :: Ord a => t a -> a
+  minimum :: Ord a => t a -> a
+  sum     :: Num a => t a -> a
+  product :: Num a => t a -> a
+\end{verbatim}
+
+
+Make `List` an instance of `Foldable`:
+
+\begin{code}
+instance Foldable List where
+  foldr :: (a -> b -> b) -> b -> List a -> b
+  foldr _ v Null = v
+  foldr f v (x :- xs) = f x $ foldr f v xs
+\end{code}
 
 
 -- Automatic derivation
