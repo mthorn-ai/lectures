@@ -78,7 +78,8 @@ log messages:
 As a functor, we should be able to apply functions to the value in a `Logger`:
 
 > instance Functor Logger where
->   fmap f (Logger x l) = Logger (f x) l
+>   fmap :: (a -> b) -> Logger a -> Logger b
+    fmap f (Logger x l) = Logger (f x) l
 
 
 When combining `Logger` values as applicative instances, we should combine the
