@@ -106,11 +106,7 @@ E.g., let's write a specification for `c2k`, `c2f`, `f2c`:
 
 \begin{code}
 c2k :: (Ord a, Floating a) => a -> a
-<<<<<<< HEAD
-c2k c | c >= 0 = c + 273.15
-=======
 c2k c | c >= -273.15 = c + 273.15
->>>>>>> 8cb741e68a5e182889669987d2b8174d6080913b
       | otherwise = error "Temperature below absolute zero"
 
 
@@ -124,20 +120,6 @@ f2c f = (f - 32) * 5/9
 
 celsiusConversionSpec :: Spec
 celsiusConversionSpec = 
-<<<<<<< HEAD
-  describe "Celsius conversions" $ do
-    describe "c2k" $ do
-      it "works for known examples" $ do
-        pending
-      it "fails for sub-abs-zero temperatures" $ do
-        pending
-    describe "c2f" $ do
-      it "works for known examples" $ do
-        pending
-    describe "f2c" $ do
-      it "works for known examples" $ do
-        pending
-=======
  describe "Celsius conversions" $ do
    describe "c2k" $ do
      it "works for known examples" $ do
@@ -161,7 +143,6 @@ celsiusConversionSpec =
 infix 4 =~=
 (=~=) :: (Floating a, Ord a) =>  a -> a -> Bool
 x =~= y = abs (x - y) < 0.0001
->>>>>>> 8cb741e68a5e182889669987d2b8174d6080913b
 \end{code}
 
 
@@ -180,11 +161,6 @@ quadRootsSpec :: Spec
 quadRootsSpec = 
   describe "quadRoots" $ do
     it "works for known examples" $ do
-<<<<<<< HEAD
-      pending
-    it "fails when non-real roots exist" $ do
-      pending
-=======
       quadRoots 1 3 2 `shouldMatchTuple` (-1, -2)
       quadRoots 1 4 4 `shouldMatchTuple` (-2, -2)
       quadRoots 1 5 6 `shouldMatchTuple` (-2, -3)
@@ -194,14 +170,11 @@ quadRootsSpec =
 
 shouldMatchTuple :: (Eq a, Show a) => (a, a) -> (a, a) -> Expectation
 shouldMatchTuple (x1, x2) (y1, y2) = [x1, x2] `shouldMatchList` [y1, y2]
->>>>>>> 8cb741e68a5e182889669987d2b8174d6080913b
 \end{code}
 
 
 Discussion: what are some problems / shortcomings of example-based testing?
 
-<<<<<<< HEAD
-=======
   - tedious to write/maintain
   - not exhaustive (e.g., what if we forget to test a corner case?)
   - not scalable (e.g., what if we have a large number of functions to test?)
@@ -210,7 +183,6 @@ Discussion: what are some problems / shortcomings of example-based testing?
   - not expressive (e.g., doesn't really document the behavior we're testing)
   - doesn't help us narrow down the cause of a failure
 
->>>>>>> 8cb741e68a5e182889669987d2b8174d6080913b
 
 Property-based tests with QuickCheck
 ------------------------------------
@@ -235,17 +207,6 @@ E.g., write a property to test that `c2f` and `f2c` are inverses:
 
 \begin{code}
 prop_c2f2c :: Double -> Bool
-<<<<<<< HEAD
-prop_c2f2c = undefined
-\end{code}
-
-
-E.g., write a property to test `mySum` using `sum` as a reference implementation (what happens if you break `mySum`?):
-
-\begin{code}
-mySum :: (Eq a, Num a) => [a] -> a
-mySum [] = 0
-=======
 prop_c2f2c c = f2c (c2f c) =~= c
 
 -- test predicates by passing them to `quickCheck` or `verboseCheck`
@@ -282,16 +243,11 @@ mySum :: (Eq a, Num a) => [a] -> a
 mySum [] = 0
 -- mySum (8:xs) = 7 + mySum xs -- broken sum / dist
 -- mySum (7:8:xs) = 7 + 9 + mySum xs -- broken comm
->>>>>>> 8cb741e68a5e182889669987d2b8174d6080913b
 mySum (x:xs) = x + mySum xs
 
 
 prop_sum :: [Integer] -> Bool
-<<<<<<< HEAD
-prop_sum = undefined
-=======
 prop_sum xs = mySum xs == sum xs
->>>>>>> 8cb741e68a5e182889669987d2b8174d6080913b
 \end{code}
 
 
@@ -300,19 +256,11 @@ addition and commutativity of addition:
 
 \begin{code}
 prop_distMultOverAdd :: Integer -> [Integer] -> Bool
-<<<<<<< HEAD
-prop_distMultOverAdd = undefined
-
-
-prop_commAdd :: [Integer] -> Property
-prop_commAdd = undefined
-=======
 prop_distMultOverAdd n xs = mySum [n*x | x <- xs] == n * mySum xs
 
 
 prop_commAdd :: [Integer] -> Property
 prop_commAdd xs = forAll (shuffle xs) (\ys -> mySum xs == mySum ys)
->>>>>>> 8cb741e68a5e182889669987d2b8174d6080913b
 \end{code}
 
 
@@ -321,13 +269,6 @@ squares and factorable quadratic equations:
 
 \begin{code}
 prop_perfSquare :: Double -> Bool
-<<<<<<< HEAD
-prop_perfSquare = undefined
-
-
-prop_solvesFactored :: Double -> Double -> Bool
-prop_solvesFactored = undefined
-=======
 prop_perfSquare f = r1 =~= r2
   where b = 2*f
         c = f^2
@@ -340,7 +281,6 @@ prop_solvesFactored f1 f2 = r1^2 + b*r1 + c =~= 0
   where b = f1 + f2
         c = f1 * f2
         (r1,r2) = quadRoots 1 b c
->>>>>>> 8cb741e68a5e182889669987d2b8174d6080913b
 \end{code}
 
 
@@ -351,15 +291,6 @@ quadRootsSpec' :: Spec
 quadRootsSpec' = 
   describe "quadRoots" $ do
     it "works for known examples" $ do
-<<<<<<< HEAD
-      pending
-    it "fails when non-real roots exist" $ do
-      pending
-    it "works correctly with perfect squares" $ 
-      pending
-    it "works correctly with factorable quadratic equations" $ 
-      pending
-=======
       quadRoots 1 3 2 `shouldMatchTuple` (-1, -2)
       quadRoots 1 4 4 `shouldMatchTuple` (-2, -2)
       quadRoots 1 5 6 `shouldMatchTuple` (-2, -3)
@@ -369,7 +300,6 @@ quadRootsSpec' =
       property prop_perfSquare
     it "works correctly with factorable quadratic equations" $ 
       property prop_solvesFactored
->>>>>>> 8cb741e68a5e182889669987d2b8174d6080913b
 \end{code}
 
 

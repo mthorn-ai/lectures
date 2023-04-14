@@ -110,9 +110,6 @@ E.g., implement the following list construction functions:
 > enumFrom' x = x : enumFrom' (succ x)
 
 
-<<<<<<< HEAD
-Note: use `take` to limit the number of values drawn from an infinite list
-=======
 
 Syntactic sugar
 ---------------
@@ -151,7 +148,6 @@ E.g., for infinite lists of `Enum` types, [I..] and [I,J..]
     [1..]    ==  enumFrom 1
 
     [3,6..]  ==  enumFromThen 3 6
->>>>>>> 8cb741e68a5e182889669987d2b8174d6080913b
 
 
 List comprehensions
